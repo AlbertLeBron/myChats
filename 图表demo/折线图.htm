@@ -1,0 +1,228 @@
+<head>
+        <meta charset="UTF-8">
+        <title>圆-椭圆</title>
+        <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+        <style>
+        	body{
+        		background: #2C343C;
+        	}
+        	div{
+		    	position: absolute;
+		    	left: 100px;
+		    	top: 200px;
+		    	color: #fff;
+		    }
+        </style>
+    </head>
+
+    <body>
+        <canvas id="myCanvas1" width="700" height="350" style="">
+        Your browser does not support the HTML5 canvas tag.
+        </canvas>
+        <script type="text/javascript">
+            var canMap={'map1' : {'title':'炉灶市场价实时趋势图',
+                'c_Arr':['30', '12', '55', '8', '67', '42','25'], 
+                'r_Arr':['3h','2.5h','2h','1.5h','1h','30min','正点'], 
+                'y_unit':'单价（件）', 
+                'x_unit':'时间'
+                }
+              }
+
+            var aaa = new mtChart('myCanvas1', canMap['map1']), coo = 0, base = 40,or = '0';
+            canMap.map1.c_Arr.push(Math.round(50*Math.random()).toString());
+            aaa.init();
+            setInterval(function(){
+                coo++;
+                if(coo>=base){
+                  or = canMap.map1.c_Arr.splice(0, 1);
+                  canMap.map1.c_Arr.push(Math.round(50*Math.random()).toString());
+                  coo=0;
+                }               
+                aaa = new mtChart('myCanvas1', canMap['map1']);
+                aaa.init();
+            }, 40);
+            function mtChart(mc, map){
+              this.map = map;
+              this.ctx = document.getElementById(mc).getContext("2d");
+              this.s_t = [60,40];
+              this.e_d = [600,300];
+              this.l_arr = [0, 10, 20, 30, 40, 50, 60];
+              this.setAxis=setAxis;
+              this.setCol=setCol;
+              this.setRow=setRow;
+              this.setUnit=setUnit;
+              this.setLine=setLine;
+              this.setTitle=setTitle; 
+              this.clear=clear; 
+              this.init=init; 
+
+              //绘制坐标轴
+              function setAxis(){
+                  this.ctx.beginPath();
+                  this.ctx.moveTo(this.s_t[0],this.s_t[1]);
+                  this.ctx.lineTo(this.s_t[0],this.e_d[1]);
+                  this.ctx.lineTo(this.e_d[0],this.e_d[1]);
+                  this.ctx.strokeStyle='#000';
+                  this.ctx.stroke();
+              }
+
+              //数组排序
+              function sortNumber(a, b)
+              {
+                  return a - b
+              }
+
+              //设置纵轴
+              function setCol(){
+
+                  var c_Arr1 = [],
+                      c_len = this.map['c_Arr'].length;
+                  for(var i=0 ;i<c_len;i++){
+                     c_Arr1.push(this.map['c_Arr'][i]);
+                  }
+
+                  c_Arr1.sort(sortNumber);
+                  var min = '0',
+                      max = '70';
+
+                  var mil = min.length;
+                  var mal = max.length;
+
+                  var pil = Math.pow(10,mil-1);
+                  var pal = Math.pow(10,mal-1);
+
+                  var minb = parseInt(min/pil);
+                  var maxb = Math.ceil(max/pil);
+
+                  var l_arrL = maxb-minb;
+                  this.l_arr = [];
+                  if(pil >= 10){
+                    for(var i = 0;i<=l_arrL;i++){
+                      this.l_arr.push((minb+i)*pil);
+                    }
+                  }
+                  else{
+                    for(var i = 0;i<=Math.ceil(max/pal);i++){
+                      this.l_arr.push(i*pal);
+                    }
+                  }
+                  console.log(mil);
+                  this.ctx.beginPath();
+                  this.ctx.font="15px Arial";
+                  this.ctx.textAlign="right";
+                  var len = this.l_arr.length,
+                      gap = (this.e_d[1]-this.s_t[1])/len;
+                  for(var i=0;i<len;i++){
+                    this.ctx.fillText(this.l_arr[i],this.s_t[0]-10,this.e_d[1]-i*gap);
+                  }
+              }
+
+              //设置横轴
+              function setRow(){
+                var arr = this.map['r_Arr'],
+                    len = arr.length;
+                var gap = (this.e_d[0]-this.s_t[0])/len;
+                this.ctx.beginPath();
+                this.ctx.textBaseline="bottom";
+                this.ctx.textAlign="center";
+                this.ctx.font="13px Arial";
+                 
+                for(var i=1;i<=len;i++){
+                    this.ctx.fillText(arr[i-1],this.s_t[0]+i*gap, this.e_d[1]+20);
+                    this.ctx.moveTo(this.s_t[0]+i*gap, this.e_d[1]-5);
+                    this.ctx.lineTo(this.s_t[0]+i*gap, this.e_d[1]);
+                    this.ctx.stroke();
+                }
+              }
+
+              //设置横纵单位名称
+              function setUnit(){
+                this.ctx.beginPath();
+                this.ctx.font="12px Arial";
+                this.ctx.fillStyle="#888";
+                if(this.map['y_unit']){
+                  this.ctx.fillText(this.map['y_unit'],this.s_t[0],this.s_t[1]-10);
+                }
+                this.ctx.textBaseline="middle";
+                this.ctx.textAlign="left";
+                if(this.map['x_unit']){
+                  this.ctx.fillText(this.map['x_unit'],this.e_d[0]+20,this.e_d[1]);
+                }
+              }
+
+              //画线
+              function setLine(){
+                  this.ctx.save();                  
+                  var arr = this.map['c_Arr'],
+                      len = arr.length,
+                      gap = (this.e_d[0]-this.s_t[0])/this.map['r_Arr'].length;
+
+                  var arr1 = [], pre = [];
+
+                  var rate = ((this.e_d[1]-this.s_t[1])/(this.l_arr.length))/(this.l_arr[1]-this.l_arr[0]);
+                  this.ctx.rect(this.s_t[0],this.s_t[1]-10,this.e_d[0]-this.s_t[0],this.e_d[1]-this.s_t[1]+10);
+                  this.ctx.clip();
+                  this.ctx.beginPath();
+                   this.ctx.moveTo(this.s_t[0]-coo/base*gap, this.e_d[1]-(or-this.l_arr[0])*rate);
+                   pre=[this.s_t[0]-coo/base*gap, this.e_d[1]-(or-this.l_arr[0])*rate];
+                  for(var i=0;i<len;i++){
+
+                    var a = this.e_d[1]-(arr[i]-this.l_arr[0])*rate;
+                    arr1.push(a);
+                    if(a!=pre[1]){
+                      this.ctx.bezierCurveTo(pre[0]+gap/2, pre[1], pre[0]+gap/2, a, this.s_t[0]+(i+1-coo/base)*gap, a);
+                    }
+                    else{
+                      this.ctx.lineTo(this.s_t[0]+(i+1-coo/base)*gap, a);
+                    }
+                    
+                    this.ctx.lineWidth=1;
+                    this.ctx.strokeStyle = '#63B8E8';
+                    this.ctx.stroke();
+                    this.ctx.beginPath();
+                    this.ctx.arc(this.s_t[0]+(i+1-coo/base)*gap,arr1[i],0.5,0,2*Math.PI);
+                    this.ctx.fillStyle="#63B8E8";
+                    this.ctx.fill();
+                    this.ctx.fillStyle="#666";
+                    this.ctx.textAlign="center";
+                    this.ctx.fillText(this.map['c_Arr'][i],this.s_t[0]+(i+1-coo/base)*gap,arr1[i]-10);                   
+                    pre=[this.s_t[0]+(i+1-coo/base)*gap, arr1[i]];
+                    this.ctx.moveTo(pre[0], pre[1]);
+                  }
+                  this.ctx.restore();
+              }
+
+              //设标题
+              function setTitle(){
+                  this.ctx.font="17px Arial bold";
+                  this.ctx.fillStyle="#000";
+                  this.ctx.textAlign="center";
+                  this.ctx.fillText(this.map['title'],(this.s_t[0]+this.e_d[0])/2,this.s_t[1]-20);
+              }
+
+              //清空画布
+              function clear(){
+                  var width = document.getElementById(mc).offsetWidth;
+                  var height = document.getElementById(mc).offsetHeight;
+
+                  this.ctx.clearRect(0,0,width,height);
+              }
+
+              function init(){
+                  this.clear();
+                  this.setLine();
+                  this.setTitle();
+                  this.setAxis();
+                  this.setCol();
+                  this.setRow();
+                  this.setUnit();
+              } 
+
+
+              
+            }
+                    </script>
+
+    </body>
+
+</html>

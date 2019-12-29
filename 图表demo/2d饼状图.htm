@@ -1,0 +1,83 @@
+<head>
+        <meta charset="UTF-8">
+        <title>圆-椭圆</title>
+        <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+        <style>
+        	body{
+        		background: #2C343C;
+        	}
+        	div{
+		    	position: absolute;
+		    	left: 100px;
+		    	top: 200px;
+		    	color: #fff;
+		    }
+        </style>
+    </head>
+
+    <body>
+        <canvas id="canvas" width="1200" height="1600"></canvas>
+        <div>输入测试数据（英文逗号隔开）<input type="" id="data" /> <input type="button" id="sub" value="运行" /></div>
+        <script type="text/javascript">
+            //扇形
+            var position = [800, 400], deg = Math.PI, ctx = document.getElementById('canvas').getContext('2d'),
+            	opacity = 0.4, data = [10,12], radius = 60,origin = 0,request,
+                colorList = ['#C1232B','#B5C334','#FCCE10','#E87C25','#27727B',
+                               '#FE8463','#9BCA63','#FAD860','#F3A43B','#60C0DD',
+                               '#D7504B','#C6E579','#F4E001','#F0805A','#26C0C0'];
+
+			CanvasRenderingContext2D.prototype.sector = function(radius, sAngle, eAngle, origin) {
+				this.beginPath();
+				this.moveTo(0, 0);
+				this.arc(0, 0, radius, 2*(sAngle+origin)*deg, 2*(eAngle+origin)*deg, false);
+				this.closePath();
+				return this;
+			};
+			ctx.translate(position[0], position[1]);
+			function drawData(data,radius,opacity,origin){
+				var start = 0, end = 0, sum = 0, l = data.length;
+				for(var i = 0;i<l;i++){
+					sum+=Number(data[i]);
+				}	
+				for(var i = 0;i<l;i++){
+					start = end;
+					end+=Number(data[i])/sum;
+					ctx.sector(radius,start,end,origin);
+					ctx.fillStyle=colorList[i];		
+					ctx.fill();
+					ctx.strokeStyle='rgba(255,255,255,0.5)';
+					ctx.lineWidth = 2;
+					ctx.stroke();
+				}
+			}
+			animate = function(){
+				var isEnd = false;
+				opacity = Number((opacity+0.04).toFixed(2));
+				radius = Number((radius+10).toFixed(2)); 
+				origin = Number((origin+0.08).toFixed(2));
+				document.getElementById('canvas').style.opacity = opacity;
+				drawData(data,radius,opacity,origin);
+				if(opacity>1){
+					isEnd = true;
+				}
+				if(!isEnd){
+					request=requestAnimationFrame(animate);
+				}else{
+					cancelAnimationFrame(request);
+				}
+			}
+			document.getElementById('sub').addEventListener('click', function(){
+	        	data = document.getElementById('data').value.split(',');
+	        	ctx.clearRect(-800,-400,canvas.width,canvas.height);
+	        	opacity = 0.4;
+	        	radius = 60;
+	        	origin=0;
+	        	cancelAnimationFrame(request);
+	        	request=requestAnimationFrame(animate);
+	        });
+	        request=requestAnimationFrame(animate);
+        </script>
+
+    </body>
+
+</html>

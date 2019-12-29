@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>圆-椭圆</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+    <style>
+        body{
+            background: #efefef;
+        }
+        div{
+            position: absolute;
+            left: 100px;
+            top: 200px;
+            color: #fff;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="canvas" width="1800" height="960"></canvas>
+    <script type="text/javascript">
+            //扇形
+            var ctx = document.getElementById('canvas').getContext('2d'), map = {}, 
+                types = [{'radius':26, 'bg':'#f60','bd':'#f30'}, {'radius':36, 'bg':'#2394CE','bd':'#046EA5'}],
+                data = {'马化腾|0':[['深圳腾讯科技公司|1','法人','参股'], ['腾讯未来有限公司|1','参股'], ['财付通支付公司|1','参股']],
+                        '马云|0':[['马化腾|0', '朋友', '同行'],['阿里巴巴|1', '法人', '参股']]},
+            colorList = ['#C1232B','#B5C334','#FCCE10','#E87C25','#27727B',
+                               '#FE8463','#9BCA63','#FAD860','#F3A43B','#60C0DD',
+                               '#D7504B','#C6E579','#F4E001','#F0805A','#26C0C0'];
+            ctx.translate(600, 100);
+            for(var key in data){
+                var key1 = key.split('|')[0];
+                if(!map[key1]){
+                    map[key1] = new spot(key1, [600*Math.random(), 600*Math.random()], key.split('|')[1]);
+                    var l = data[key].length;
+                    for(var i = 0;i<l;i++){
+                        var name = data[key][i][0].split('|')[0];
+                        if(!map[name]){
+                            map[name] = new spot(name, [600*Math.random(), 600*Math.random()], data[key][i][0].split('|')[1]);                           
+                        }
+                        data[key][i].shift();
+                        map[key1].relation[name] = map[name];
+                        map[key1].rt[name] = data[key][i].join(' ');
+                    }
+                }
+            }
+            for(var key in map){
+                var p = map[key];
+                ctx.save();
+                var rel = map[key].relation;
+                for(var k in rel){
+                    var r = rel[k].pos;
+                    ctx.moveTo(p.pos[0], p.pos[1]);
+                    ctx.lineTo(r[0], r[1]);
+                    ctx.lineWidth = 1;
+                    ctx.textBaseline="middle";       
+                    ctx.strokeStyle = '#F48460';
+                    ctx.stroke();
+                    var txt = map[key].rt[k];
+                    ctx.save()
+                    /*ctx.translate(-600+(p.pos[0]+r[0])*0.5-ctx.measureText(txt).width, -100+(p.pos[1]+r[1])*0.5-8);*/
+                    /*ctx.rotate(Math.atan((r[1]-p.pos[1])/(r[0]-p.pos[0])));*/
+                    ctx.fillText(txt, (p.pos[0]+r[0])*0.5-ctx.measureText(txt).width*0.5, (p.pos[1]+r[1])*0.5);
+                    ctx.restore();
+                }
+                ctx.restore();
+            }
+            for(var key in map){
+                ctx.save();
+                var p = map[key];
+                ctx.beginPath();
+                ctx.arc(p.pos[0], p.pos[1], p.radius, 0, 2*Math.PI);
+                ctx.fillStyle = p.bg;
+                ctx.fill();
+                ctx.fillStyle = '#fff';
+                ctx.font = '12px 微软雅黑';
+                ctx.textBaseline="middle";               
+                write(key, p);
+                ctx.strokeStyle = p.bd;
+                ctx.lineWidth = 2;
+                ctx.stroke();
+                ctx.closePath();
+                ctx.restore();
+            }
+            function spot(name, pos, type){
+                this.name = name;
+                this.pos = pos;
+                this.radius = types[type].radius;
+                this.bg = types[type].bg;
+                this.bd = types[type].bd;
+                this.relation = {};
+                this.rt = {};
+            }
+            function write(str, p){
+                var wl = str.length, line = Math.round(wl/4), top = p.pos[1]-(line-1)*18/2, txt = '', count = 0;
+                for(var i = 0;i<wl;i++){
+                    txt+=str[i];
+                    if(txt.length%4 == 0 ||i == wl-1){                        
+                         ctx.fillText(txt, p.pos[0]-ctx.measureText(txt).width/2, top+18*count);
+                         txt='';
+                         count++;
+                    }                  
+                }
+            }
+    </script>
+</body>
+</html>

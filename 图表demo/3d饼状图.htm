@@ -1,0 +1,86 @@
+<head>
+        <meta charset="UTF-8">
+        <title>圆-椭圆</title>
+        <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+        <style>
+        	div{
+		    	position: absolute;
+		    	left: 100px;
+		    	top: 200px;
+		    	color: #fff;
+		    }
+        </style>
+    </head>
+
+    <body>
+        <canvas id="canvas" width="1200" height="1600"></canvas>
+        <script type="text/javascript">
+            //扇形
+            var position = [800, 400], deg = Math.PI, ctx = document.getElementById('canvas').getContext('2d'),
+            	opacity = 0.4, data = [8,5,4,9,18,10,12], radius = 100,origin = 0,request, point = [], 
+                colorList = ['#C1232B','#B5C334','#FCCE10','#E87C25','#27727B',
+                               '#FE8463','#9BCA63','#FAD860','#F3A43B','#60C0DD',
+                               '#D7504B','#C6E579','#F4E001','#F0805A','#26C0C0'];
+
+			CanvasRenderingContext2D.prototype.sector = function(radius, sAngle, eAngle, origin) {
+				this.beginPath();
+				this.moveTo(0, 0);
+				this.arc(0, 0, radius, 2*(sAngle+origin)*deg, 2*(eAngle+origin)*deg, false);
+				this.closePath();
+				return this;
+			};
+			function drawData(data,radius,opacity,origin){
+				ctx.save();
+				point = [];
+				ctx.translate(position[0], position[1]);
+				var start = 0, end = 0, sum = 0, l = data.length;
+				for(var i = 0;i<l;i++){
+					sum+=Number(data[i]);
+				}	
+				ctx.scale(2,1);
+				for(var i = 0;i<l;i++){
+					start = end;
+					end+=Number(data[i])/sum;
+					if(start<0.5 && end>0.5){
+						point.push([start, 0.5, [radius*Math.cos(2*deg*(start)), radius*Math.sin(2*deg*(start))],[radius*Math.cos(2*deg*(0.5)), radius*Math.sin(2*deg*(0.5))]]);
+						point.push([0.5, end, [radius*Math.cos(2*deg*(0.5)), radius*Math.sin(2*deg*(0.5))], [radius*Math.cos(2*deg*(end)), radius*Math.sin(2*deg*(end))]]);
+					}else{
+						point.push([start, end, [radius*Math.cos(2*deg*(start)), radius*Math.sin(2*deg*(start))],[radius*Math.cos(2*deg*(end)), radius*Math.sin(2*deg*(end))]]);
+					}
+					ctx.sector(radius,start,end,origin);
+					ctx.fillStyle=colorList[i];		
+					ctx.fill();					
+					ctx.strokeStyle='rgba(255,255,255,0.5)';
+					ctx.lineWidth = 1;
+					ctx.stroke();
+				}
+				ctx.restore();
+			}
+			function faces(arr, c){
+				ctx.save();
+				ctx.translate(position[0], position[1]);
+				ctx.scale(2,1);
+				ctx.beginPath();
+				ctx.arc(0, 0, radius, 2*(arr[0]+origin)*deg, 2*(arr[1]+origin)*deg, false);
+				ctx.moveTo(arr[2][0], arr[2][1]);
+				ctx.arc(0, -50, radius, 2*(arr[0]+origin)*deg, 2*(arr[1]+origin)*deg, false);
+				ctx.lineTo(arr[3][0], arr[3][1]);
+				ctx.fillStyle=c;
+				ctx.fill();
+				ctx.strokeStyle='rgba(255,255,255,0.5)';
+				ctx.stroke();
+				ctx.closePath();
+				ctx.restore();
+			}
+			drawData(data,radius,1,0);
+			var l = point.length;
+			for(var i = l-1; i>=0;i--){
+				faces(point[i], colorList[i]);
+			}
+			position = [800, 350];
+			drawData(data,radius,1,0);
+        </script>
+
+    </body>
+
+</html>

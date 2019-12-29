@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+<meta name="description" content="">
+<meta name="keywords" content="">
+<link href="" rel="stylesheet">
+<style>
+    body{
+        background: #eee;
+    }
+    div{
+    	position: absolute;
+    	left: 100px;
+    	top: 200px;
+    }
+</style>
+</head>
+<body>
+	<div>输入测试数据（英文逗号隔开）<input type="" id="data" /> <input type="button" id="sub" value="运行" /></div>
+	<canvas id="canvas" width="1890px" height="1200px"></canvas>
+    <script type="text/javascript">
+        var data = [50,100,120,200,80] ,between = 50, 
+            colorList = ['20,38,78', '200,38,78', '180,160,78', '20,38,78', '33,58,114','34,95,176'];
+    	var canvas = document.getElementById("canvas"),
+    		ctx = canvas.getContext("2d"),
+    		x = 50,
+    		y = 50,
+    		z = 50;
+    	function faces(dataEle, x1, z1){
+            var x2 = x1?x1:x, z2 = z1?z1:z;
+            var points = [
+                [0,0],
+                [x2,0],
+                [x2,-dataEle],
+                [0,-dataEle],
+                [z2*Math.cos(45*Math.PI/180)/2,-z2*Math.sin(45*Math.PI/180)/2],
+                [z2*Math.cos(45*Math.PI/180)/2,-dataEle-z2*Math.sin(45*Math.PI/180)/2],
+                [x2+z2*Math.cos(45*Math.PI/180)/2,-z2*Math.sin(45*Math.PI/180)/2],
+                [x2+z2*Math.cos(45*Math.PI/180)/2,-dataEle-z2*Math.sin(45*Math.PI/180)/2]
+            ];
+            return[
+    		[points[4],points[5],points[7],points[6]], //后
+    		[points[0],points[4],points[6],points[1]], //下
+    		[points[0],points[3],points[5],points[4]], //左
+    		[points[1],points[2],points[7],points[6]], //右
+    		[points[2],points[3],points[5],points[7]], //上
+    		[points[0],points[3],points[2],points[1]], //前
+    	]};
+        var fp = faces(400,600,400);
+        function drawBg(){
+            ctx.save();
+            ctx.translate(600-350*Math.cos(45*Math.PI/180)/2,600+350*Math.cos(45*Math.PI/180)/2);
+            for(var i=0,len=3;i<len;i++){
+                var p = fp[i];
+                ctx.beginPath();
+                for(var j=0,l=p.length;j<l;j++){
+                    if(j==0){
+                        ctx.moveTo(p[j][0],p[j][1]);
+                    }else{
+                        ctx.lineTo(p[j][0],p[j][1]);
+                    }
+                }
+                ctx.closePath();
+                ctx.fillStyle = '#fff';
+                ctx.fill();
+                ctx.strokeStyle="#000";
+                ctx.lineWidth=0.5;
+                ctx.stroke();
+                var s, e, b;
+                ctx.beginPath();
+                if(i==0){
+                    s = [p[0][0],p[0][1]];
+                    e = [p[3][0],p[3][1]];
+                    b = [p[1][0],p[1][1]];
+                    for(var n = 0;s[1]-n*50>b[1];n++){
+                        ctx.lineWidth=0.5;
+                        drawDashLine(ctx, s[0], (s[1]-n*50+1), e[0], (e[1]-n*50+1), 5, true, n);
+                    }
+                }else if(i==1){
+                    s = [p[1][0],p[1][1]];
+                    e = [p[0][0],p[0][1]];
+                    b = [p[2][0],p[2][1]];
+                    for(var n = 0;s[0]+n*50<b[0];n++){
+                        ctx.lineWidth=0.5;
+                        drawDashLine(ctx, (s[0]+n*50-0.5), s[1], (e[0]+n*50-0.5),e[1],5.5, false, n);
+                    }
+                }
+                ctx.closePath();                
+            }
+            ctx.restore();
+        }
+    	function draw(x,y,dataEle,fill){
+            var f = faces(dataEle);
+    		ctx.save();
+    		ctx.translate(x,y);
+            var pp;
+	    	for(var i=0,len=f.length;i<len;i++){
+	    		var p = f[i];
+	    		ctx.beginPath();
+	    		for(var j=0,l=p.length;j<l;j++){
+	    			if(j==0){
+	    				ctx.moveTo(p[j][0],p[j][1]);
+	    			}else{
+	    				ctx.lineTo(p[j][0],p[j][1]);
+	    			}
+	    		}
+	    		ctx.closePath();
+	    		if(fill){
+	    			ctx.fillStyle = randC(i);
+	    			ctx.fill();
+	    		}else{
+	    			ctx.stroke();
+	    		}
+                pp = p[2]
+	    	}
+            ctx.beginPath();
+            ctx.font="20px Verdana";
+            var gradient=ctx.createLinearGradient(0,0,30,0);
+            gradient.addColorStop("0","magenta");
+            gradient.addColorStop("0.5","orange");
+            gradient.addColorStop("1.0","red");
+            ctx.fillStyle=gradient;
+            ctx.fillText(dataEle, pp[0]-28 , pp[1]-40);
+            ctx.closePath();
+	    	ctx.restore();
+    	}
+    	function randC(i){
+    		return 'rgba('+colorList[i]+',0.8)';
+    	}
+        function drawDashLine(ctx, x1, y1, x2, y2, dashLength, dir, n){
+              var dashLen = dashLength === undefined ? 5 : dashLength,
+              xpos = x2 - x1,
+              ypos = y2 - y1,
+              numDashes = Math.floor(Math.sqrt(xpos * xpos + ypos * ypos) / dashLen); 
+              for(var i=0; i<numDashes; i++){
+                 if(i % 2 === 0){
+                     ctx.moveTo(x1 + (xpos/numDashes) * i, y1 + (ypos/numDashes) * i); 
+                  }else{
+                      ctx.lineTo(x1 + (xpos/numDashes) * i, y1 + (ypos/numDashes) * i);
+                  }
+               }
+              ctx.strokeStyle = '#666';
+              ctx.stroke();
+              ctx.fillStyle= '#000';
+              if(dir){
+                   ctx.fillText(n*50, x2+6 , y2);
+              }else{
+                   ctx.fillText(n*50, x2 , y2+16);
+              }
+              
+        }
+        var cData = [], l = data.length;
+        for(var i = 0; i<l;i++){
+            cData.push(0);
+        }
+        animate = function(){
+            var isEnd = false;
+            ctx.clearRect(0,0,canvas.width,canvas.height);
+            for(var i =0;i<l;i++ ){
+                cData[i] = cData[i]+3>data[i]?data[i]:cData[i]+3;
+                if(cData[i]!= data[i]){
+                    isEnd = true;
+                }
+            }
+            drawBg();
+            for(var i = 0; i<l;i++){
+                draw(600+i*(50+between),600,cData[i],true);
+            }
+            if(isEnd){
+                requestAnimationFrame(animate)
+            }
+        }
+        requestAnimationFrame(animate);
+        document.getElementById('sub').addEventListener('click', function(){
+        	data = document.getElementById('data').value.split(',');
+        	cData = [], l = data.length;
+        	for(var i = 0; i<l;i++){
+	            cData.push(0);
+	        }
+        	requestAnimationFrame(animate)
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+        <meta charset="UTF-8">
+        <title>漏斗图</title>
+        <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+        <style>
+        	body{
+        		background: #2C343C;
+        	}
+        	div{
+		    	position: absolute;
+		    	left: 100px;
+		    	top: 200px;
+		    	color: #fff;
+		    }
+        </style>
+    </head>
+
+    <body>
+        <canvas id="canvas" width="1800" height="1600"></canvas>
+        <div>输入测试数据（英文逗号隔开）<input type="" id="data" /> <input type="button" id="sub" value="运行" /></div>
+        <script type="text/javascript">
+            //扇形
+            var ctx = document.getElementById('canvas').getContext('2d'), data = [20,40,60,80,100], bw = 70,l=data.length, bh = 60, bt = 2, point = [],
+            colorList = ['#C1232B','#B5C334','#FCCE10','#E87C25','#27727B',
+                               '#FE8463','#9BCA63','#FAD860','#F3A43B','#60C0DD',
+                               '#D7504B','#C6E579','#F4E001','#F0805A','#26C0C0'];
+            ctx.translate(1000, 500);
+            function drawFunnel(data){
+            	l=data.length;
+            	var order = data.sort(function(a,b){return a-b});
+	            var n = order[0];
+	            order.unshift(0);
+	            for(var i=0;i<l;i++){
+	            	var p1 = [0.5*order[i]*bw/n, -i*(bh+bt)],
+	            		p2 = [-0.5*order[i]*bw/n, -i*(bh+bt)],
+	            		p3 = [-0.5*order[i+1]*bw/n, -(i)*(bh+bt)-bh],
+	            		p4 = [0.5*order[i+1]*bw/n, -(i)*(bh+bt)-bh];
+	            	ctx.save();
+	            	ctx.beginPath();
+	            	ctx.moveTo(p1[0], p1[1]);
+	            	ctx.lineTo(p2[0], p2[1]);
+	            	ctx.lineTo(p3[0], p3[1]);
+	            	ctx.lineTo(p4[0], p4[1]);
+	            	ctx.fillStyle = colorList[i];
+	            	ctx.fill();
+	            	ctx.fillStyle = '#fff';
+	            	ctx.font="14px 微软雅黑";
+	            	ctx.textBaseline="middle";
+	            	var txt = order[i+1];
+	            	ctx.fillText(order[i+1],-0.5*ctx.measureText(txt).width,-i*(bh+bt)-0.5*bh)
+	            	ctx.closePath();
+	            	ctx.restore();
+	            }
+            }
+            document.getElementById('sub').addEventListener('click', function(){
+            	data = document.getElementById('data').value.split(',');
+	        	ctx.clearRect(-1000,-500,canvas.width,canvas.height);
+            	drawFunnel(data);
+            });
+            drawFunnel(data);
+        </script>
+    </body>
+
+</html>

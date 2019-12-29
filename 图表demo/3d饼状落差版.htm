@@ -1,0 +1,299 @@
+<head>
+        <meta charset="UTF-8">
+        <title>圆-椭圆</title>
+        <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+        <style>
+        	body{
+        		background: #2C343C;
+        	}
+        	div{
+		    	position: absolute;
+		    	left: 100px;
+		    	top: 200px;
+		    	color: #fff;
+		    }
+        </style>
+    </head>
+
+    <body>
+        <canvas id="canvas" width="1800" height="1600"></canvas>
+        <div>输入测试数据（英文逗号隔开）<input type="" id="data" /> <input type="button" id="sub" value="运行" /></div>
+        <script type="text/javascript">
+            //扇形
+            var ctx = document.getElementById('canvas').getContext('2d'), data = [];
+            function drawPie(data){
+            	ctx.clearRect(0,0,canvas.width,canvas.height);
+
+            	var position = [800, 400], deg = Math.PI, 
+            	opacity = 0.4, rankData = data.concat().sort(function(a,b){return a-b}), 
+            	radius = 100,origin = 0, point = [], op = [], rank = [], rankFace = [], order = [], rec, mark = [],rate = [];
+                colorList = ['#C1232B','#B5C334','#FCCE10','#E87C25','#27727B',
+                               '#FE8463','#9BCA63','#FAD860','#F3A43B','#60C0DD',
+                               '#D7504B','#C6E579','#F4E001','#F0805A','#26C0C0'];
+
+				CanvasRenderingContext2D.prototype.sector = function(radius, sAngle, eAngle, origin,last,i) {
+					this.beginPath();
+					var origin =  (last?-rank[i]*20:0);
+					this.moveTo(0, origin);
+					this.arc(0, origin, radius, 2*(sAngle+origin)*deg, 2*(eAngle+origin)*deg, false);
+					this.closePath();
+					return this;
+				};
+				function drawData(data,radius,opacity,origin,last){
+					ctx.save();
+					var clonerankData = clonerankData = rankData.concat();
+					point = [];
+					op = [];
+					rate=[];
+					ctx.translate(position[0], position[1]);
+					var start = 0, end = 0, sum = 0, l = data.length;
+					order = new Array(l);
+					for(var i = 0;i<l;i++){
+						sum+=Number(data[i]);
+					}	
+					ctx.scale(2,1);
+					for(var i = 0;i<l;i++){
+						start = end;
+						end+=Number(data[i])/sum;
+						rate.push(Number(data[i])/sum);
+						if(start<0.5 && end>0.5){
+							point.push([start, 0.5, [radius*Math.cos(2*deg*(start)), radius*Math.sin(2*deg*(start))],[radius*Math.cos(2*deg*(0.5)), radius*Math.sin(2*deg*(0.5))]]);
+							point.push([0.5, end, [radius*Math.cos(2*deg*(0.5)), radius*Math.sin(2*deg*(0.5))], [radius*Math.cos(2*deg*(end)), radius*Math.sin(2*deg*(end))]]);
+							rec = i;
+						}else if(end == 0.5){
+							point.push([start, 0.5, [radius*Math.cos(2*deg*(start)), radius*Math.sin(2*deg*(start))],[radius*Math.cos(2*deg*(0.5)), radius*Math.sin(2*deg*(0.5))]]);
+							point.push([0.5, 0.5, [radius*Math.cos(2*deg*(0.5)), radius*Math.sin(2*deg*(0.5))], [radius*Math.cos(2*deg*(0.5)), radius*Math.sin(2*deg*(0.5))]]);
+							rec = i;
+						}else{
+							point.push([start, end, [radius*Math.cos(2*deg*(start)), radius*Math.sin(2*deg*(start))],[radius*Math.cos(2*deg*(end)), radius*Math.sin(2*deg*(end))]]);
+						}
+						op.push([start, end, [radius*Math.cos(2*deg*(start)), radius*Math.sin(2*deg*(start))],[radius*Math.cos(2*deg*(end)), radius*Math.sin(2*deg*(end))]]);
+						var n = clonerankData.indexOf(data[i]);
+						order[n] = [start,end,i];
+						clonerankData[n] = '';
+						ctx.sector(radius,start,end,origin,last,i);
+						ctx.fillStyle=colorList[i];		
+						ctx.fill();					
+						ctx.strokeStyle='rgba(255,255,255,0.5)';
+						ctx.lineWidth = 0.5;
+						ctx.stroke();
+					}
+					ctx.restore();
+				}
+				function drawDataTop(data,radius,opacity,origin,last,pos){
+					ctx.save();
+					ctx.translate(position[0], position[1]);
+					ctx.scale(2,1);
+					var l = order.length;
+					for(var i = 0;i<l;i++){
+						if((pos && order[i][0]<0.5) || (!pos && order[i][0]>=0.5)){
+							ctx.sector(radius,order[i][0],order[i][1],origin,last,order[i][2]);
+							ctx.fillStyle=colorList[order[i][2]];		
+							ctx.fill();					
+							ctx.strokeStyle='rgba(255,255,255,0.5)';
+							ctx.lineWidth = 1;
+							ctx.stroke();														
+						}
+						if(pos){
+							mark.push([0.5*(order[i][0]+order[i][1]), 
+								[(radius-10)*Math.cos(2*deg*(0.5*(order[i][0]+order[i][1]))), (radius-10)*Math.sin(2*deg*(0.5*(order[i][0]+order[i][1])))-rank[order[i][2]]*20], 
+								[(radius+30)*Math.cos(2*deg*(0.5*(order[i][0]+order[i][1]))), (radius+30)*Math.sin(2*deg*(0.5*(order[i][0]+order[i][1])))-rank[order[i][2]]*20]]);
+						}					
+					}
+					ctx.restore();
+				}
+				function faces(arr, c){
+					ctx.save();
+					ctx.translate(position[0], position[1]);
+					ctx.scale(2,1);
+					ctx.beginPath();
+					ctx.arc(0, 0, radius, 2*(arr[0]+origin)*deg, 2*(arr[1]+origin)*deg, false);
+					ctx.moveTo(arr[2][0], arr[2][1]);
+					ctx.arc(0, -50-rankFace[i]*20, radius, 2*(arr[0]+origin)*deg, 2*(arr[1]+origin)*deg, false);
+					ctx.lineTo(arr[3][0], arr[3][1]);
+					ctx.fillStyle=c;
+					ctx.fill();
+					ctx.strokeStyle='rgba(255,255,255,0.5)';
+					ctx.stroke();
+					ctx.closePath();
+					ctx.restore();
+				}
+				drawData(data,radius,1,0);
+				rank=[];
+				rankFace = [];
+				rankData = data.concat().sort(function(a,b){return a-b});
+				for(var i=0;i<data.length;i++){
+					rank.push(rankData.indexOf(data[i]));
+					rankFace.push(rankData.indexOf(data[i]));
+					if(point[i][1] == 0.5){
+						rankFace.push(rankData.indexOf(data[i]));
+					}
+				}
+				var l = point.length;
+				for(var i = l-1; i>=rec+1;i--){
+					faces(point[i], colorList[i-1]);
+				}
+				ctx.save();
+				position = [800, 400];
+				ctx.translate(position[0], position[1]);
+				ctx.scale(2,1);
+				l = op.length;
+				for(var i = 0;i<l;i++){
+					var a = i ,b = i+1<l?i+1:0, c = i>=1?i-1:l-1;
+					if(rank[b]>rank[a] && op[a][1]>=0.5 && op[a][1]<0.75){					
+						ctx.beginPath();
+						ctx.moveTo(0, -50-rank[a]*20);
+						ctx.lineTo(op[a][3][0], op[a][3][1]-50-rank[a]*20);
+						ctx.lineTo(op[b][2][0], op[b][2][1]-50-rank[b]*20);
+						ctx.lineTo(0, -50-rank[b]*20);
+						ctx.strokeStyle='rgba(255,255,255,0.5)';
+						ctx.lineWidth = 0.5;
+						ctx.stroke();
+						ctx.lineTo(0, -50-rank[a]*20);						
+						ctx.fillStyle = colorList[b];
+						ctx.fill();						
+						ctx.closePath();
+						if(op[b][1]-op[b][0] != 0.5 && rank[b] == data.length-1){
+							var f = b+1<l?b+1:0;
+							f = rank[a]>rank[f]?a:f;
+							ctx.beginPath();
+							ctx.moveTo(0, -50-rank[b]*20);
+							ctx.lineTo(0, -50-rank[f]*20);
+							ctx.stroke();
+							ctx.closePath();
+						}
+					}
+					if(rank[c]>rank[a] && op[a][0]>0.75){					
+						ctx.beginPath();
+						ctx.moveTo(0, -50-rank[c]*20);
+						ctx.lineTo(op[c][3][0], op[c][3][1]-50-rank[c]*20);
+						ctx.lineTo(op[a][2][0], op[a][2][1]-50-rank[a]*20);
+						ctx.lineTo(0, -50-rank[a]*20);
+						ctx.strokeStyle='rgba(255,255,255,0.5)';
+						ctx.lineWidth = 0.5;
+						ctx.stroke();
+						ctx.lineTo(0, -50-rank[c]*20);						
+						ctx.fillStyle = colorList[c];
+						ctx.fill();						
+						ctx.closePath();
+						if(op[b][1]-op[b][0] != 0.5 && rank[b] == data.length-1){
+							var f = b+1<l?b+1:0;
+							f = rank[a]>rank[f]?a:f;
+							ctx.beginPath();
+							ctx.moveTo(0, -50-rank[b]*20);
+							ctx.lineTo(0, -50-rank[f]*20);
+							ctx.stroke();
+							ctx.closePath();
+						}
+					}
+				}			
+				ctx.restore();
+				position = [800, 350];
+				drawDataTop(data,radius,1,0,true,false);
+				
+				ctx.save();
+				position = [800, 400];
+				ctx.translate(position[0], position[1]);
+				ctx.scale(2,1);
+				l = op.length;
+				for(var i = 0;i<l;i++){
+					var a = i ,b = i+1<l?i+1:0, c = i>=1?i-1:l-1;
+					if(rank[b]>rank[a] && op[a][1]>0.25 && op[a][1]<0.5){					
+						ctx.beginPath();
+						ctx.moveTo(0, -50-rank[a]*20);
+						ctx.lineTo(op[a][3][0], op[a][3][1]-50-rank[a]*20);
+						ctx.lineTo(op[b][2][0], op[b][2][1]-50-rank[b]*20);
+						ctx.lineTo(0, -50-rank[b]*20);
+						ctx.strokeStyle='rgba(255,255,255,0.5)';
+						ctx.lineWidth = 0.5;
+						ctx.stroke();
+						ctx.lineTo(0, -50-rank[a]*20);						
+						ctx.fillStyle = colorList[b];
+						ctx.fill();
+						ctx.closePath();
+						if(op[b][1]-op[b][0] != 0.5 && rank[b] == data.length-1){
+							var f = b+1<l?b+1:0;
+							f = rank[a]>rank[f]?a:f;
+							ctx.beginPath();
+							ctx.moveTo(0, -50-rank[b]*20);
+							ctx.lineTo(0, -50-rank[f]*20);
+							ctx.stroke();
+							ctx.closePath();
+						}
+					}
+					if(rank[c]>rank[a] && op[a][0]<0.25){					
+						ctx.beginPath();
+						ctx.moveTo(0, -50-rank[c]*20);
+						ctx.lineTo(op[c][3][0], op[c][3][1]-50-rank[c]*20);
+						ctx.lineTo(op[c][3][0], op[c][3][1]-50-rank[c]*20);
+						ctx.lineTo(op[a][2][0], op[a][2][1]-50-rank[a]*20);
+						ctx.lineTo(0, -50-rank[a]*20);
+						ctx.strokeStyle='rgba(255,255,255,0.5)';
+						ctx.lineWidth = 0.5;
+						ctx.stroke();
+						ctx.lineTo(0, -50-rank[c]*20);						
+						ctx.fillStyle = colorList[c];
+						ctx.fill();
+						ctx.closePath();
+						if(op[b][1]-op[b][0] != 0.5 && rank[b] == data.length-1){
+							var f = b+1<l?b+1:0;
+							f = rank[a]>rank[f]?a:f;
+							ctx.beginPath();
+							ctx.moveTo(0, -50-rank[b]*20);
+							ctx.lineTo(0, -50-rank[f]*20);
+							ctx.stroke();
+							ctx.closePath();
+						}
+					}
+				}
+				ctx.restore();
+				position = [800, 350];
+				drawDataTop(data,radius,1,0,true,true);
+				position = [800, 400];
+				l = point.length;
+				for(var i = rec; i>=0;i--){
+					faces(point[i], colorList[i]);
+				}
+				ctx.save();
+				l = mark.length;
+				ctx.translate(position[0], position[1]-50);
+				ctx.scale(2,1);
+				for(var i = 0;i<l;i++){
+					ctx.beginPath();
+					ctx.moveTo(mark[i][1][0],mark[i][1][1]);
+					ctx.lineTo(mark[i][2][0],mark[i][2][1]);
+					ctx.textBaseline="bottom";
+				    ctx.fillStyle="#fff";
+				    ctx.font="20px Arial";
+					var txt = '('+data[i]+', '+(100*rate[i]).toFixed(2)+'%)',
+					    tw = ctx.measureText(txt).width;					    
+					if(mark[i][0]<=0.25 || mark[i][0]>=0.75){
+						ctx.lineTo(mark[i][2][0]+80,mark[i][2][1]);	
+						ctx.save();
+						ctx.scale(0.5,1);				
+						ctx.fillText(txt,(mark[i][2][0]+80)*2-tw,mark[i][2][1]-10);
+						ctx.restore();
+					}else{
+						ctx.lineTo(mark[i][2][0]-80,mark[i][2][1]);
+						ctx.save();
+						ctx.scale(0.5,1);					
+						ctx.fillText(txt,(mark[i][2][0]-80)*2,mark[i][2][1]-10);
+						ctx.restore();
+					}
+					ctx.lineWidth = 1;
+					ctx.strokeStyle='#fff';
+					ctx.stroke();
+					ctx.closePath();
+				}
+				ctx.restore();
+            }
+            document.getElementById('sub').addEventListener('click', function(){
+	        	data = document.getElementById('data').value.split(',');
+	        	drawPie(data.sort(function(a,b){return a-b}));
+	        });
+            drawPie([10,16,20,25]);
+        </script>
+
+    </body>
+
+</html>
