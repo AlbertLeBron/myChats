@@ -8,4 +8,4 @@
 ##### 4. 3d柱状图，<a target="_blank" href="https://albertlebron.github.io/myChats/%E5%9B%BE%E8%A1%A8demo/3d%E6%9F%B1%E7%8A%B6%E5%9B%BE.htm">预览demo</a>
 ##### 5. 漏斗图，<a target="_blank" href="https://albertlebron.github.io/myChats/%E5%9B%BE%E8%A1%A8demo/%E6%BC%8F%E6%96%97%E5%9B%BE.htm">预览demo</a>
 ##### 6. 关系图，<a target="_blank" href="https://albertlebron.github.io/myChats/%E5%9B%BE%E8%A1%A8demo/%E5%85%B3%E7%B3%BB%E5%9B%BE.htm">预览demo</a>
-##### 3. 股市动态折线图，<a target="_blank" href="https://albertlebron.github.io/myChats/%E5%9B%BE%E8%A1%A8demo/%E6%8A%98%E7%BA%BF%E5%9B%BE.htm">预览demo</a>
+##### 7. 股市动态折线图，<a target="_blank" href="https://albertlebron.github.io/myChats/%E5%9B%BE%E8%A1%A8demo/%E6%8A%98%E7%BA%BF%E5%9B%BE.htm">预览demo</a>
